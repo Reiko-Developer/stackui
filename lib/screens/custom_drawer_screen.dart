@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 
-class CustomDrawer extends StatefulWidget {
+class CustomDrawerScreen extends StatefulWidget {
   static final routeName = '/custom-drawer';
 
   @override
-  _CustomDrawerState createState() => _CustomDrawerState();
+  _CustomDrawerScreenState createState() => _CustomDrawerScreenState();
 }
 
-class _CustomDrawerState extends State<CustomDrawer>
+class _CustomDrawerScreenState extends State<CustomDrawerScreen>
     with SingleTickerProviderStateMixin {
   //properties
   static const Duration toggleDuration = Duration(milliseconds: 250);
 
+  //Utilizar mediaquery para saber as dimensões e definir os gestos possíveis
+  //definindo as coordenadas de início e fim do gesto.
   static const double _maxSlide = 200;
   static const double minDragStartEdge = 60;
   static const double maxDragStartEdge = _maxSlide - 16;
+
   AnimationController _animationController;
   bool _canBeDragged = false;
 
@@ -94,8 +97,13 @@ class _CustomDrawerState extends State<CustomDrawer>
   }
 
   void _onDragStart(DragStartDetails details) {
+    //A animação está no ponto 0 (FULL SCREEN)
+    //E o toque foi realizado do lado esquerdo
     bool isDragOpenFromLeft = _animationController.isDismissed &&
         details.globalPosition.dx < minDragStartEdge;
+
+    //A animação está completa (a screen sofreu um scale de 0.5)
+    //E o toque ocorreu na parte direita da tela.
     bool isDragCloseFromRight = _animationController.isCompleted &&
         details.globalPosition.dx > maxDragStartEdge;
 

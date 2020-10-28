@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stackui/animation_controller_screen.dart';
+import 'package:stackui/screens/custom_drawer_3d_screen.dart';
 import 'package:stackui/screens/home_screen.dart';
 import 'package:stackui/screens/stack_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
-import 'package:stackui/widget/custom_drawer.dart';
+import 'package:stackui/screens/custom_drawer_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {
         TransformScreenOne.routeName: (ctx) => TransformScreenOne(),
         AnimationControllerScreen.routeName: (ctx) =>
             AnimationControllerScreen(),
-        CustomDrawer.routeName: (ctx) => CustomDrawer(),
+        CustomDrawerScreen.routeName: (ctx) => CustomDrawerScreen(),
+        CustomDrawer3dScreen.routeName: (ctx) => CustomDrawer3dScreen(),
       },
     );
   }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:stackui/animation_controller_screen.dart';
+import 'package:stackui/screens/custom_drawer_3d_screen.dart';
 import 'package:stackui/screens/stack_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
-import 'package:stackui/widget/custom_drawer.dart';
+import 'package:stackui/screens/custom_drawer_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -13,7 +14,8 @@ class HomeScreen extends StatelessWidget {
     screens.add(StackScreen.routeName);
     screens.add(TransformScreenOne.routeName);
     screens.add(AnimationControllerScreen.routeName);
-    screens.add(CustomDrawer.routeName);
+    screens.add(CustomDrawerScreen.routeName);
+    screens.add(CustomDrawer3dScreen.routeName);
 
     return Scaffold(
       appBar: AppBar(
