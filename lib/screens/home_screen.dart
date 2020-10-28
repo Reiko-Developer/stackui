@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:stackui/animation_controller_screen.dart';
 import 'package:stackui/screens/stack_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
 
@@ -9,6 +11,7 @@ class HomeScreen extends StatelessWidget {
 
     screens.add(StackScreen.routeName);
     screens.add(TransformScreenOne.routeName);
+    screens.add(AnimationControllerScreen.routeName);
     return Scaffold(
       appBar: AppBar(
         title: Text('Learning Complex UI'),

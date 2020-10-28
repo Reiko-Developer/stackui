@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stackui/animation_controller_screen.dart';
 import 'package:stackui/screens/home_screen.dart';
 import 'package:stackui/screens/stack_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
@@ -22,6 +23,8 @@ class MyApp extends StatelessWidget {
       routes: {
         StackScreen.routeName: (ctx) => StackScreen(),
         TransformScreenOne.routeName: (ctx) => TransformScreenOne(),
+        AnimationControllerScreen.routeName: (ctx) =>
+            AnimationControllerScreen(),
       },
     );
   }
