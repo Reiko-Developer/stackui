@@ -27,11 +27,17 @@ class _AnimationControllerScreenState extends State<AnimationControllerScreen>
 
   Card _myCard(String txt) {
     return Card(
+      borderOnForeground: false,
+      // color: Colors.red,
+      elevation: 30,
       child: Container(
         height: 300,
         width: 300,
         child: Center(
-          child: Text(txt),
+          child: Text(
+            txt,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -41,15 +47,19 @@ class _AnimationControllerScreenState extends State<AnimationControllerScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: AnimatedBuilder(
+      body: Center(
+        child: AnimatedBuilder(
           animation: _animationController,
           child: _myCard('1'),
           builder: (context, child) {
             return Transform.rotate(
-              angle: _animationController.value * math.pi * 2,
+              alignment: Alignment.center,
+              angle: _animationController.value * math.pi * 4,
               child: child,
             );
-          }),
+          },
+        ),
+      ),
     );
   }
 }
