@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
           itemCount: screens.length,
           itemBuilder: (ctx, i) {
             return RaisedButton(
-              child: Text((i + 1).toString()),
+              child: Text(screens[i]),
               onPressed: () => Navigator.pushNamed(context, screens[i]),
             );
           },

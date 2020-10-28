@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class CustomDrawer3dScreen extends StatefulWidget {
-  static final routeName = '/custom-drawer';
+  static final routeName = '/cd-3d';
 
   @override
   CustomDrawer3dScreenState createState() => new CustomDrawer3dScreenState();
