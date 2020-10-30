@@ -14,10 +14,9 @@ class _AnimationControllerScreenState extends State<AnimationControllerScreen>
   AnimationController _animationController;
 
   @override
-  @override
   void initState() {
     super.initState();
-    _animationController = new AnimationController(
+    _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 2),
     );
