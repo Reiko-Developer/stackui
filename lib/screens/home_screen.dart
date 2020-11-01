@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:stackui/screens/animation_controller_screen.dart';
 import 'package:stackui/screens/airline_surveys_screen.dart';
 import 'package:stackui/screens/custom_drawer_3d_screen.dart';
@@ -7,6 +6,10 @@ import 'package:stackui/screens/stack_screen.dart';
 import 'package:stackui/screens/teste_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
 import 'package:stackui/screens/custom_drawer_screen.dart';
+import 'package:stackui/widgets/animations/flutter_animations/explicit_animations.dart';
+import 'package:stackui/widgets/animations/flutter_animations/flutter_dev_animations2.dart';
+import 'package:stackui/widgets/animations/flutter_animations/ioio_animation.dart';
+import 'package:stackui/widgets/animations/flutter_animations/reusable_animation.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -20,6 +23,11 @@ class HomeScreen extends StatelessWidget {
     screens.add(CustomDrawer3dScreen.routeName);
     screens.add(AirlineSurveysScreen.routeName);
     screens.add(TesteScreen.routeName);
+    //flutter animations
+    screens.add(FlutterDevAnimations.routeName);
+    screens.add(IoioAnimation.routeName);
+    screens.add(ReusableAnimation.routeName);
+    screens.add(ExplicitAnimations.routeName);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,10 +44,10 @@ class HomeScreen extends StatelessWidget {
             );
           },
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+            crossAxisCount: 3,
             childAspectRatio: 3 / 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+            crossAxisSpacing: 5,
+            mainAxisSpacing: 5,
           ),
         ),
       ),
