@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-class MultipleAnimation extends StatelessWidget {
-  MultipleAnimation({Key key, @required this.child, this.controller})
+class ReikoAnimations extends StatelessWidget {
+  ReikoAnimations({Key key, @required this.child, this.controller})
       : firstOpacity = Tween<double>(
           begin: 0,
           end: 1.0,
@@ -114,97 +112,6 @@ class MultipleAnimation extends StatelessWidget {
       builder: _buildAnimation,
       animation: controller,
       child: child,
-    );
-  }
-}
-
-class MultipleAnimationController extends StatefulWidget {
-  MultipleAnimationController(this.animationDuration);
-  final Duration animationDuration;
-
-  @override
-  _MultipleAnimationControllerState createState() =>
-      _MultipleAnimationControllerState();
-}
-
-class _MultipleAnimationControllerState
-    extends State<MultipleAnimationController> with TickerProviderStateMixin {
-  AnimationController _controller;
-  //Controla o andamento da animação.
-  var _isAboveHalfAnimation = false;
-  int aux = 0;
-  Widget container = Container(
-    color: Colors.red,
-    child: Text('TESTE'),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller =
-        AnimationController(duration: widget.animationDuration, vsync: this)
-          ..addListener(() {
-            if (_isAboveHalfAnimation) return;
-            if (_controller.value >= 0.5) {
-              _controller.stop();
-              _isAboveHalfAnimation = true;
-            }
-          })
-          ..addStatusListener(
-            (status) => print(status),
-          );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _playAnimation() async {
-    try {
-      if (_controller.isCompleted || _controller.isDismissed) {
-        _isAboveHalfAnimation = false;
-        await _controller.repeat().orCancel;
-        return;
-      }
-      if (_isAboveHalfAnimation) {
-        await _controller.forward().orCancel;
-        return;
-      }
-    } on TickerCanceled {}
-  }
-
-  void changeContainer() {
-    aux++;
-    setState(() {
-      container = Column(children: [
-        Container(
-          color: Colors.blue,
-          child: Text('$aux'),
-        ),
-      ]);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reiko Animations!'),
-      ),
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _playAnimation,
-        onDoubleTap: changeContainer,
-        child: Center(
-          child: MultipleAnimation(
-            controller: _controller.view,
-            child: container,
-          ),
-        ),
-      ),
     );
   }
 }
