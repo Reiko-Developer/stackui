@@ -1,26 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:stackui/model/reiko_animation_exception.dart';
 
-class OpacityAnimation {
+class TranslateAnimation {
   final AnimationController controller;
-  Animation<double> animation;
-  double beginValue, endValue;
+  Animation<Offset> _animation;
+  Offset beginValue, endValue;
   double startAnimation, endAnimation;
+  Curve curve;
+  final String id;
 
-  OpacityAnimation(
-      {@required this.controller,
-      this.beginValue,
-      this.endValue,
-      this.startAnimation,
-      this.endAnimation}) {
+  TranslateAnimation({
+    @required this.id,
+    @required this.controller,
+    this.beginValue,
+    this.endValue,
+    this.startAnimation,
+    this.endAnimation,
+    this.curve = Curves.linear,
+  }) {
     initialize();
+  }
+
+  Animation<Offset> get animation {
+    return _animation;
   }
 
   initialize() {
     validate();
-    animation = Tween<double>(
-      begin: beginValue,
-      end: endValue,
+    _animation = Tween<Offset>(
+      begin: const Offset(100.0, 50.0),
+      end: const Offset(200.0, 300.0),
     ).animate(
       CurvedAnimation(
         parent: controller,

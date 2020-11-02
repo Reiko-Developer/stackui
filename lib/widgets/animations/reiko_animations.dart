@@ -1,108 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:stackui/widgets/animations/opacity_animations.dart';
+import 'package:stackui/widgets/animations/translate_animation.dart';
 
-class ReikoAnimations extends StatelessWidget {
-  ReikoAnimations({Key key, @required this.child, this.controller})
-      : firstOpacity = Tween<double>(
-          begin: 0,
-          end: 1.0,
-        ).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              0.0,
-              0.5,
-              curve: Curves.linear,
-            ),
-          ),
-        ),
-        secondOpacity = Tween<double>(
-          begin: 1,
-          end: 0,
-        ).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              0.5,
-              1,
-              curve: Curves.linear,
-            ),
-          ),
-        ),
-        firstMove = Tween<double>(begin: 0, end: 100).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              0,
-              0.5,
-              curve: Curves.linear,
-            ),
-          ),
-        ),
-        secondMove = Tween<double>(begin: 0, end: 100).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              0.5,
-              1,
-              curve: Curves.linear,
-            ),
-          ),
-        ),
-        firstSize = Tween<Size>(begin: Size(0, 0), end: Size(100, 100)).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              0,
-              0.5,
-              curve: Curves.linear,
-            ),
-          ),
-        ),
-        secondSize =
-            Tween<Size>(begin: Size(0, 0), end: Size(100, 100)).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(
-              0.5,
-              1,
-              curve: Curves.linear,
-            ),
-          ),
-        ),
-        super(key: key);
+//Recebe o controlador e a lista de animações
+class ReikoRenderAnimations extends StatefulWidget {
+  ReikoRenderAnimations(
+      {Key key,
+      @required this.child,
+      //Recebe uma lista de animações
+      @required this.opacityAnimations,
+      @required this.translateAnimations,
+      this.controller})
+      : super(key: key);
 
   final AnimationController controller;
-  final Animation<double> firstOpacity;
-  final Animation<double> secondOpacity;
-  final Animation<double> firstMove;
-  final Animation<double> secondMove;
-  final Animation<Size> firstSize;
-  final Animation<Size> secondSize;
+  final List<OpacityAnimation> opacityAnimations;
+  final List<TranslateAnimation> translateAnimations;
 
   final Widget child;
 
+  @override
+  _ReikoRenderAnimationsState createState() => _ReikoRenderAnimationsState();
+}
+
+class _ReikoRenderAnimationsState extends State<ReikoRenderAnimations> {
+  double lastValidOpacityValue = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.forward();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
+  }
+
+  double get _opacity {
+    double tempoAtual = widget.controller.value;
+
+    for (OpacityAnimation i in widget.opacityAnimations) {
+      if (tempoAtual >= i.startAnimation && tempoAtual <= i.endAnimation)
+        lastValidOpacityValue = i.animation.value;
+    }
+    return lastValidOpacityValue;
+  }
+
+  void runAnimation() {
+    if (widget.controller.isDismissed) {
+      widget.controller.forward();
+    } else if (widget.controller.isCompleted) widget.controller.reverse();
+  }
+
+  Widget widgetsToAnimate(child) {
+    return widget.opacityAnimations.isNotEmpty
+        ? Opacity(
+            opacity: _opacity,
+            child: child,
+          )
+        : child;
+  }
+
   Widget _buildAnimation(BuildContext context, Widget child) {
-    return Container(
-      child: Opacity(
-        // Uses the first value for the first part (half)
-        // of the animation.
-        opacity:
-            firstOpacity.value < 1 ? firstOpacity.value : secondOpacity.value,
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: firstMove.value + secondMove.value,
-              left: firstMove.value + secondMove.value,
-              child: Container(
-                width: firstSize.value.width + secondSize.value.width,
-                height: firstSize.value.height + secondSize.value.height,
-                color: Colors.red,
-                child: child,
-              ),
-            ),
-          ],
-        ),
-      ),
+    print('building animation...');
+    return GestureDetector(
+      onTap: runAnimation,
+      child: widgetsToAnimate(child),
     );
   }
 
@@ -110,8 +75,8 @@ class ReikoAnimations extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       builder: _buildAnimation,
-      animation: controller,
-      child: child,
+      animation: widget.controller,
+      child: widget.child,
     );
   }
 }
