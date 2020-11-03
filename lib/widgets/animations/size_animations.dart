@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:stackui/model/reiko_animation_exception.dart';
 
 //Para que seja executada, deve ser passado um controlador.
-class OpacityAnimations {
+class SizeAnimations {
   AnimationController _controller;
-  List<OpacityAnimation> _animations = List<OpacityAnimation>();
+  List<SizeAnimation> _animations = List<SizeAnimation>();
   int aux = 0;
 
-  List<OpacityAnimation> get animations => _animations;
+  List<SizeAnimation> get animations => _animations;
 
   set controller(AnimationController controller) {
     _controller = controller;
@@ -25,14 +25,14 @@ class OpacityAnimations {
   //4º Intervalo de tempo de animações não for sequencial.
   add({
     controller,
-    beginValue = 0.0,
-    finalValue = 1.0,
+    beginValue = Size.zero,
+    finalValue = const Size(100.0, 100.0),
     start = 0.0,
     end = 1.0,
     curve = Curves.linear,
   }) {
     //
-    var newAnimation = OpacityAnimation(
+    var newAnimation = SizeAnimation(
       controller: controller,
       beginValue: beginValue,
       finalValue: finalValue,
@@ -46,48 +46,48 @@ class OpacityAnimations {
     validateIntervalBetweenAnimations();
   }
 
+  //@override
   //Checks the interval between animations, select the current animation and returns it's value.
   //Problems:
   //1. There's no current animation to execute.
   //   a: In case there's a valid old value, return it.
   //   b: Otherwise, return the value of the first animation.
-
-  double actualAnimationValue(
-      {@required double controllerValue, double oldValidValue = -1}) {
+  Size actualAnimationValue(
+      {@required double controllerValue, Size oldValidValue}) {
     for (var a in _animations) {
       if (a.endAnimation >= controllerValue) return a.finalValue;
     }
 
     //Se houver um valor antigo válido, retorne-o, caso contrário,
     //retorne o primeiro valor válido para esse tipo de animação.
-    return oldValidValue == -1 ? _animations[0].beginValue : oldValidValue;
+    return oldValidValue == null ? _animations[0].beginValue : oldValidValue;
   }
 
+  //Método não sofre alteração, é só herdar.
   validateIntervalBetweenAnimations() {
     for (var i = 0; i < _animations.length - 1; i++) {
       for (var j = i + 1; j < _animations.length; j++) {
         if (_animations[i].endAnimation > _animations[j].startAnimation)
           throw ReikoAnimationException(
-            reikoException: ReikoExceptions.OpacityAnimations.index,
-            message:
-                'The interval between same type animations must be sequencial.\n' +
-                    'But, animation $i and $j don\'t follow the rule.\n' +
-                    '$i: ${_animations[i]} \n$j: ${_animations[j]}',
-            code: 5,
-          );
+              reikoException: ReikoExceptions.TranslateAnimations.index,
+              message:
+                  'The interval between same type animations must be sequencial.\n' +
+                      'But, animation $i and $j don\'t follow the rule.\n' +
+                      '$i: ${_animations[i]} \n$j: ${_animations[j]}',
+              code: 5);
       }
     }
   }
 }
 
-class OpacityAnimation {
+class SizeAnimation {
   AnimationController controller;
-  Animation<double> _animation;
-  double beginValue, finalValue;
+  Animation<Size> _animation;
+  Size beginValue, finalValue;
   double startAnimation, endAnimation;
   Curve curve;
 
-  OpacityAnimation({
+  SizeAnimation({
     this.controller,
     this.beginValue,
     this.finalValue,
@@ -100,7 +100,7 @@ class OpacityAnimation {
     }
   }
 
-  Animation<double> get animation {
+  Animation<Size> get animation {
     return _animation;
   }
 
@@ -108,7 +108,7 @@ class OpacityAnimation {
   createAnimation({newController}) {
     if (_animation != null) print('A animação já foi setada anteriormente');
 
-    _animation = Tween<double>(
+    _animation = Tween<Size>(
       begin: beginValue,
       end: finalValue,
     ).animate(
@@ -123,20 +123,13 @@ class OpacityAnimation {
     );
   }
 
+  //Usar super.ValidValues(){}
   //1º Retorna false se o valor inicial/final ou início/fim da animação,
   //estiverem fora do intervalo [0-1]
   validValues() {
-    if (!isBetween(beginValue) || !isBetween(finalValue))
-      throw ReikoAnimationException(
-        reikoException: ReikoExceptions.OpacityAnimations.index,
-        message:
-            'The Begin and Final animation values must be in the [0...1] interval.',
-        code: 1,
-      );
-
     if (!isBetween(startAnimation) || !isBetween(endAnimation)) return false;
     throw ReikoAnimationException(
-      reikoException: ReikoExceptions.OpacityAnimations.index,
+      reikoException: ReikoExceptions.TranslateAnimations.index,
       message:
           'The Start and End time animation values must be in the [0...1] interval.',
       code: 2,
@@ -150,28 +143,29 @@ class OpacityAnimation {
       return true;
   }
 
+  //@Override method
   //Retorna false se:
   //1º Valor inicial e final da animação forem iguais.
   //2º Valor de tempo de início da animação for maior ou igual ao valor de fim da mesma.
   validate() {
-    if (beginValue == finalValue)
+    if (beginValue.width == finalValue.width &&
+        beginValue.height == finalValue.height)
       throw ReikoAnimationException(
-          reikoException: ReikoExceptions.OpacityAnimations.index,
+          reikoException: ReikoExceptions.TranslateAnimations.index,
           message: 'The Begin and Final animation values can\'t be equal.',
           code: 3);
     else if (startAnimation >= endAnimation)
       throw ReikoAnimationException(
-          reikoException: ReikoExceptions.OpacityAnimations.index,
+          reikoException: ReikoExceptions.TranslateAnimations.index,
           message:
-              'The end animation value can\'t be lower than the start value.\n' +
+              'The end animation value can\'t be lower than the start value.' +
                   'Start: $startAnimation, end: $endAnimation',
           code: 4);
   }
 
   @override
   String toString() {
-    String result =
-        'Start/end animation values: ($startAnimation, $endAnimation).';
+    String result = 'Start/end animation: ($startAnimation, $endAnimation).';
     return result;
   }
 }
