@@ -1,12 +1,31 @@
-class ReikoAnimationException implements Exception {
-  ReikoAnimationException(this._message, this._code);
-  final String _message;
+import 'package:flutter/material.dart';
 
-  final int _code;
+enum ReikoExceptions {
+  SizeAnimations,
+  ColorAnimations,
+  OpacityAnimations,
+  TranslateAnimations,
+  BorderAnimations,
+  ThreeDX,
+  ThreeDY,
+  ThreeDZ
+}
+
+class ReikoAnimationException implements Exception {
+  ReikoAnimationException(
+      {@required code, @required message, @required reikoException}) {
+    _message = message;
+    _code = code;
+    _exception = reikoException;
+  }
+  String _message;
+  int _exception;
+  int _code;
 
   @override
   String toString() {
-    return 'Status code: $_code, ' + _message;
+    return '${ReikoExceptions.values[_exception]}Exception: Status code: $_code.\n' +
+        _message;
   }
 
   String get message {
