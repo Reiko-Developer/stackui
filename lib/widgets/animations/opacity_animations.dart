@@ -5,16 +5,14 @@ import 'package:stackui/model/reiko_animation_exception.dart';
 //Para que seja executada, deve ser passado um controlador.
 class OpacityAnimations {
   AnimationController _controller;
-  List<OpacityAnimation> _animations = List<OpacityAnimation>();
+  List<OpacityAnimation> animations = List<OpacityAnimation>();
   int aux = 0;
-
-  List<OpacityAnimation> get animations => _animations;
 
   set controller(AnimationController controller) {
     _controller = controller;
 
-    for (int i = 0; i < _animations.length; i++) {
-      _animations[i].createAnimation(newController: _controller);
+    for (int i = 0; i < animations.length; i++) {
+      animations[i].createAnimation(newController: _controller);
     }
   }
 
@@ -42,7 +40,7 @@ class OpacityAnimations {
     );
 
     newAnimation.validate();
-    _animations.add(newAnimation);
+    animations.add(newAnimation);
     validateIntervalBetweenAnimations();
   }
 
@@ -54,27 +52,24 @@ class OpacityAnimations {
 
   double actualAnimationValue(
       {@required double controllerValue, double oldValidValue = -1}) {
-    for (var a in _animations) {
+    for (var a in animations) {
       if (a.endAnimation >= controllerValue) return a.finalValue;
     }
 
     //Se houver um valor antigo válido, retorne-o, caso contrário,
     //retorne o primeiro valor válido para esse tipo de animação.
-    return oldValidValue == -1 ? _animations[0].beginValue : oldValidValue;
+    return oldValidValue == -1 ? animations[0].beginValue : oldValidValue;
   }
 
   validateIntervalBetweenAnimations() {
-    for (var i = 0; i < _animations.length - 1; i++) {
-      for (var j = i + 1; j < _animations.length; j++) {
-        if (_animations[i].endAnimation > _animations[j].startAnimation)
+    for (var i = 0; i < animations.length - 1; i++) {
+      for (var j = i + 1; j < animations.length; j++) {
+        if (animations[i].endAnimation > animations[j].startAnimation)
           throw ReikoAnimationException(
-            reikoException: ReikoExceptions.OpacityAnimations.index,
-            message:
-                'The interval between same type animations must be sequencial.\n' +
-                    'But, animation $i and $j don\'t follow the rule.\n' +
-                    '$i: ${_animations[i]} \n$j: ${_animations[j]}',
-            code: 5,
-          );
+              'The interval between same type animations must be sequencial.\n' +
+                  'But, animation $i and $j don\'t follow the rule.\n' +
+                  '$i: ${animations[i]} \n$j: ${animations[j]}',
+              5);
       }
     }
   }
@@ -117,7 +112,7 @@ class OpacityAnimation {
         curve: Interval(
           startAnimation,
           endAnimation,
-          curve: curve,
+          curve: Curves.linear,
         ),
       ),
     );
@@ -128,18 +123,14 @@ class OpacityAnimation {
   validValues() {
     if (!isBetween(beginValue) || !isBetween(finalValue))
       throw ReikoAnimationException(
-        reikoException: ReikoExceptions.OpacityAnimations.index,
-        message:
-            'The Begin and Final animation values must be in the [0...1] interval.',
-        code: 1,
+        'The Begin and Final animation values must be in the [0...1] interval.',
+        1,
       );
 
     if (!isBetween(startAnimation) || !isBetween(endAnimation)) return false;
     throw ReikoAnimationException(
-      reikoException: ReikoExceptions.OpacityAnimations.index,
-      message:
-          'The Start and End time animation values must be in the [0...1] interval.',
-      code: 2,
+      'The Start and End time animation values must be in the [0...1] interval.',
+      2,
     );
   }
 
@@ -156,16 +147,10 @@ class OpacityAnimation {
   validate() {
     if (beginValue == finalValue)
       throw ReikoAnimationException(
-          reikoException: ReikoExceptions.OpacityAnimations.index,
-          message: 'The Begin and Final animation values can\'t be equal.',
-          code: 3);
+          'The Begin and Final animation values can\'t be equal.', 3);
     else if (startAnimation >= endAnimation)
       throw ReikoAnimationException(
-          reikoException: ReikoExceptions.OpacityAnimations.index,
-          message:
-              'The end animation value can\'t be lower than the start value.\n' +
-                  'Start: $startAnimation, end: $endAnimation',
-          code: 4);
+          'The end animation value can\'t be lower than the start value.', 4);
   }
 
   @override
