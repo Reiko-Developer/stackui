@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stackui/widgets/animations/reiko/handlers/handle_3dX_animations.dart';
 import 'package:stackui/widgets/animations/reiko/handlers/handle_color_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_opacity_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_size_animations.dart';
 import 'package:stackui/widgets/animations/reiko/handlers/handle_translate_animations.dart';
+import 'package:stackui/widgets/animations/reiko/handlers/opacity_animations.dart';
+import 'package:stackui/widgets/animations/reiko/handlers/size_animations.dart';
 
 //Recebe o controlador e a lista de animações
 class ReikoRenderAnimations extends StatefulWidget {
@@ -20,9 +20,9 @@ class ReikoRenderAnimations extends StatefulWidget {
   }) : super(key: key);
 
   final AnimationController controller;
-  final HandleOpacityAnimations opacity;
+  final OpacityAnimations opacity;
+  final SizeAnimations size;
   final HandleTranslateAnimations translate;
-  final HandleSizeAnimations size;
   final HandleColorAnimations color;
   final Handle3DXAnimations threeD;
   //Refatorar
@@ -49,6 +49,7 @@ class _ReikoRenderAnimationsState extends State<ReikoRenderAnimations> {
   //Controla a animação indo para frente quanto não iniciada e indo para trás
   //quando a animação for completada.
   void runAnimation() {
+    print('clicked');
     if (widget.controller.isDismissed) {
       widget.controller.forward();
     } else if (widget.controller.isCompleted) widget.controller.reverse();
@@ -59,16 +60,15 @@ class _ReikoRenderAnimationsState extends State<ReikoRenderAnimations> {
     Widget temporaryChild = GestureDetector(onTap: runAnimation, child: child);
 
     //OpacityAnimations
-    if (widget.opacity.animations.isNotEmpty)
+    if (widget.opacity != null)
       temporaryChild = Opacity(
-          opacity: widget.opacity.currentAnimationValue(value),
-          child: temporaryChild);
+          opacity: widget.opacity.animation.value, child: temporaryChild);
 
     //SizeAnimationValues
-    if (widget.size.animations.isNotEmpty)
+    if (widget.size != null)
       temporaryChild = Container(
-        width: widget.size.currentAnimationValue(value).width,
-        height: widget.size.currentAnimationValue(value).width,
+        width: widget.size.animation.value.width,
+        height: widget.size.animation.value.height,
         child: temporaryChild,
       );
 

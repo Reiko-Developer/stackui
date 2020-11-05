@@ -4,6 +4,7 @@ import 'package:stackui/screens/airline_surveys_screen.dart';
 import 'package:stackui/screens/custom_drawer_3d_screen.dart';
 import 'package:stackui/screens/home_screen.dart';
 import 'package:stackui/screens/stack_screen.dart';
+import 'package:stackui/screens/reiko_animations_screen.dart';
 import 'package:stackui/screens/teste_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
 import 'package:stackui/screens/custom_drawer_screen.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Complex UI',
       theme: _themeData,
-      home: TesteScreen(),
+      home: ReikoAnimationsScreen(),
       routes: {
         StackScreen.routeName: (ctx) => StackScreen(),
         TransformScreenOne.routeName: (ctx) => TransformScreenOne(),
@@ -37,12 +38,13 @@ class MyApp extends StatelessWidget {
         CustomDrawerScreen.routeName: (ctx) => CustomDrawerScreen(),
         CustomDrawer3dScreen.routeName: (ctx) => CustomDrawer3dScreen(),
         AirlineSurveysScreen.routeName: (ctx) => AirlineSurveysScreen(),
-        TesteScreen.routeName: (ctx) => TesteScreen(),
         //Flutter animations
         IoioAnimation.routeName: (ctx) => IoioAnimation(),
         FlutterDevAnimations.routeName: (ctx) => FlutterDevAnimations(),
         ReusableAnimation.routeName: (ctx) => ReusableAnimation(),
         ExplicitAnimations.routeName: (ctx) => ExplicitAnimations(),
+        ReikoAnimationsScreen.routeName: (ctx) => ReikoAnimationsScreen(),
+        TesteScreen.routeName: (ctx) => TesteScreen(),
       },
     );
   }

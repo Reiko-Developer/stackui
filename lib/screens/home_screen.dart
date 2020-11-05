@@ -3,6 +3,7 @@ import 'package:stackui/screens/animation_controller_screen.dart';
 import 'package:stackui/screens/airline_surveys_screen.dart';
 import 'package:stackui/screens/custom_drawer_3d_screen.dart';
 import 'package:stackui/screens/stack_screen.dart';
+import 'package:stackui/screens/reiko_animations_screen.dart';
 import 'package:stackui/screens/teste_screen.dart';
 import 'package:stackui/screens/transform_screen_one.dart';
 import 'package:stackui/screens/custom_drawer_screen.dart';
@@ -22,12 +23,15 @@ class HomeScreen extends StatelessWidget {
     screens.add(CustomDrawerScreen.routeName);
     screens.add(CustomDrawer3dScreen.routeName);
     screens.add(AirlineSurveysScreen.routeName);
-    screens.add(TesteScreen.routeName);
+    screens.add(ReikoAnimationsScreen.routeName);
     //flutter animations
     screens.add(FlutterDevAnimations.routeName);
     screens.add(IoioAnimation.routeName);
     screens.add(ReusableAnimation.routeName);
     screens.add(ExplicitAnimations.routeName);
+    //Reiko Animations
+    screens.add(ReikoAnimationsScreen.routeName);
+    screens.add(TesteScreen.routeName);
 
     return Scaffold(
       appBar: AppBar(
