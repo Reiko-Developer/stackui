@@ -1,38 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_3dX_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_color_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_translate_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/opacity_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/size_animations.dart';
+import 'package:stackui/widgets/animations/reiko/box_decoration_animations.dart';
+import 'package:stackui/widgets/animations/reiko/color_animations.dart';
+import 'package:stackui/widgets/animations/reiko/slide_animations.dart';
+import 'package:stackui/widgets/animations/reiko/threed_animations.dart';
+import 'package:stackui/widgets/animations/reiko/positioned_animations.dart';
+import 'package:stackui/widgets/animations/reiko/opacity_animations.dart';
+import 'package:stackui/widgets/animations/reiko/size_animations.dart';
 
 //Recebe o controlador e a lista de animações
-class ReikoRenderAnimations extends StatefulWidget {
-  ReikoRenderAnimations({
+class RenderAnimations extends StatefulWidget {
+  RenderAnimations({
     Key key,
     @required this.child,
+    @required this.controller,
+
     //Recebe uma lista de animações
-    @required this.opacity,
-    @required this.translate,
-    @required this.size,
-    @required this.color,
-    @required this.threeD,
-    this.controller,
+    this.opacity,
+    this.size,
+    this.color,
+    this.threeD,
+    this.position,
+    this.slide,
+    this.decoration,
   }) : super(key: key);
 
   final AnimationController controller;
   final OpacityAnimations opacity;
   final SizeAnimations size;
-  final HandleTranslateAnimations translate;
-  final HandleColorAnimations color;
-  final Handle3DXAnimations threeD;
+  final ColorAnimations color;
+  final ThreeDAnimations threeD;
+  final PositionedAnimations position;
+  final SlideAnimations slide;
+  final BoxDecorationAnimations decoration;
+
   //Refatorar
   final Widget child;
 
   @override
-  _ReikoRenderAnimationsState createState() => _ReikoRenderAnimationsState();
+  _RenderAnimationsState createState() => _RenderAnimationsState();
 }
 
-class _ReikoRenderAnimationsState extends State<ReikoRenderAnimations> {
+class _RenderAnimationsState extends State<RenderAnimations> {
+  Widget temporaryChild;
+
   @override
   void initState() {
     super.initState();
@@ -55,17 +65,24 @@ class _ReikoRenderAnimationsState extends State<ReikoRenderAnimations> {
     } else if (widget.controller.isCompleted) widget.controller.reverse();
   }
 
+  ///
+  ///TODO: Create an exception for when having Positioned and size/translate animations in the same animation.
+  ///
+  ///TODO: Think on improvements, try to join all properties, except Positioned, in just one Container.
+  ///Search for performance issues
+  ///
   Widget widgetsToAnimate(Container child) {
-    final value = widget.controller.value;
-    Widget temporaryChild = GestureDetector(onTap: runAnimation, child: child);
+    temporaryChild = GestureDetector(onTap: runAnimation, child: child);
+    //Positioned widget deve ser adicionado por último
 
-    //OpacityAnimations
-    if (widget.opacity != null)
-      temporaryChild = Opacity(
-          opacity: widget.opacity.animation.value, child: temporaryChild);
+    if (widget.slide != null && widget.position == null) {
+      temporaryChild = SlideTransition(
+        position: widget.slide.animation,
+        child: temporaryChild,
+      );
+    }
 
-    //SizeAnimationValues
-    if (widget.size != null)
+    if (widget.size != null && widget.position == null)
       temporaryChild = Container(
         width: widget.size.animation.value.width,
         height: widget.size.animation.value.height,
@@ -73,34 +90,44 @@ class _ReikoRenderAnimationsState extends State<ReikoRenderAnimations> {
       );
 
     //Color animations
-    if (widget.color.animations.isNotEmpty) {
+    if (widget.color != null) {
       temporaryChild = Container(
-        color: widget.color.currentAnimationValue(value),
+        color: widget.color.animation.value,
         child: temporaryChild,
       );
     }
 
-    if (widget.threeD.animations.isNotEmpty) {
-      final currentValue = widget.threeD.currentAnimationValue(value);
+    if (widget.threeD != null) {
       temporaryChild = Transform(
         transform: Matrix4.identity()
           ..setEntry(3, 2, 0.0011)
-          ..rotateX(currentValue)
-          ..rotateY(currentValue)
-          ..rotateZ(currentValue),
+          ..rotateX(widget.threeD.animation.value.x)
+          ..rotateY(widget.threeD.animation.value.y)
+          ..rotateZ(widget.threeD.animation.value.z),
         origin: Offset.zero,
         child: temporaryChild,
       );
     }
 
-    //Positioned widget deve ser adicionado por último
-    //TranslateAnimations
-    if (widget.translate.animations.isNotEmpty) {
-      final pos =
-          widget.translate.currentAnimationValue(widget.controller.value);
-      temporaryChild = Positioned(
-        left: pos.dx,
-        top: pos.dy,
+    if (widget.opacity != null) {
+      temporaryChild = FadeTransition(
+        opacity: widget.opacity.animation,
+        child: temporaryChild,
+      );
+    }
+
+    if (widget.decoration != null) {
+      print('decoration');
+      temporaryChild = DecoratedBoxTransition(
+        decoration: widget.decoration.animation,
+        position: DecorationPosition.background,
+        child: temporaryChild,
+      );
+    }
+
+    if (widget.position != null) {
+      temporaryChild = PositionedTransition(
+        rect: widget.position.animation,
         child: temporaryChild,
       );
     }

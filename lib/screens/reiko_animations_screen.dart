@@ -1,12 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:stackui/widgets/animations/reiko/box_decoration_animations.dart';
+import 'package:stackui/widgets/animations/reiko/slide_animations.dart';
+import 'package:stackui/widgets/animations/reiko/threed_animations.dart';
+import 'package:vector_math/vector_math.dart' as math;
+import 'dart:math';
+import 'package:stackui/widgets/animations/reiko/color_animations.dart';
 
-import 'package:stackui/widgets/animations/reiko/handlers/handle_3dX_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_color_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/handle_translate_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/opacity_animations.dart';
-import 'package:stackui/widgets/animations/reiko/handlers/size_animations.dart';
+import 'package:stackui/widgets/animations/reiko/positioned_animations.dart';
+import 'package:stackui/widgets/animations/reiko/opacity_animations.dart';
+import 'package:stackui/widgets/animations/reiko/size_animations.dart';
 import 'package:stackui/widgets/animations/reiko/render_animations.dart';
 
 class ReikoAnimationsScreen extends StatefulWidget {
@@ -24,25 +26,113 @@ class ReikoAnimationsScreen extends StatefulWidget {
     ),
     TweenSequenceItem<Size>(
       tween: ConstantTween<Size>(
-        Size(100, 100),
+        Size(200, 200),
       ),
       weight: 1,
     ),
   ];
 
+  final List<TweenSequenceItem<Color>> colorSequenceList = [
+    TweenSequenceItem<Color>(
+      tween: ColorTween(
+        begin: Colors.white,
+        end: Colors.blue,
+      ).chain(CurveTween(curve: Curves.linear)),
+      weight: 1,
+    ),
+    TweenSequenceItem<Color>(
+      tween: ConstantTween<Color>(Colors.blue),
+      weight: 1,
+    ),
+    TweenSequenceItem<Color>(
+      tween: ColorTween(
+        begin: Colors.blue,
+        end: Colors.red,
+      ).chain(CurveTween(curve: Curves.linear)),
+      weight: 2,
+    ),
+  ];
+
+  final List<TweenSequenceItem<RelativeRect>> relativeRectSequenceList = [
+    TweenSequenceItem<RelativeRect>(
+      tween: RelativeRectTween(
+        begin: RelativeRect.fromLTRB(30, 380, 200, 30),
+        end: RelativeRect.fromLTRB(200, 10, 0, 350),
+      ),
+      weight: 3,
+    ),
+    TweenSequenceItem<RelativeRect>(
+      tween: ConstantTween<RelativeRect>(
+        RelativeRect.fromLTRB(200, 10, 0, 350),
+      ),
+      weight: 1,
+    ),
+    TweenSequenceItem<RelativeRect>(
+      tween: RelativeRectTween(
+        begin: RelativeRect.fromLTRB(200, 10, 0, 350),
+        end: RelativeRect.fromLTRB(10, 430, 240, 10),
+      ),
+      weight: 3,
+    ),
+  ];
+
   final List<TweenSequenceItem<double>> opacitySequenceList = [
     TweenSequenceItem<double>(
-      tween: Tween<double>(
-        begin: 0,
-        end: 1,
+      tween: Tween<double>(begin: 1, end: 0),
+      weight: 1,
+    ),
+    TweenSequenceItem<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      weight: 1,
+    ),
+  ];
+
+  final List<TweenSequenceItem<math.Vector3>> threeDSequenceList = [
+    TweenSequenceItem<math.Vector3>(
+      tween: Tween<math.Vector3>(
+        begin: math.Vector3.zero(),
+        end: math.Vector3(pi, 0, 0),
       ).chain(
         CurveTween(curve: Curves.linear),
       ),
       weight: 1,
-    ),
-    TweenSequenceItem<double>(
-      tween: ConstantTween<double>(0),
+    )
+  ];
+
+  final List<TweenSequenceItem<Offset>> slideSequenceList = [
+    TweenSequenceItem<Offset>(
+      tween: Tween<Offset>(begin: Offset.zero, end: Offset(2, 3.5)),
       weight: 1,
+    ),
+  ];
+
+  final List<TweenSequenceItem<Decoration>> boxDecorationSequenceList = [
+    TweenSequenceItem<Decoration>(
+      weight: 1,
+      tween: DecorationTween(
+        begin: BoxDecoration(
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(style: BorderStyle.none),
+          borderRadius: BorderRadius.circular(60.0),
+          shape: BoxShape.rectangle,
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Color(0x66666666),
+              blurRadius: 10.0,
+              spreadRadius: 3.0,
+              offset: Offset(0, 6.0),
+            )
+          ],
+        ),
+        end: BoxDecoration(
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(
+            style: BorderStyle.none,
+          ),
+          borderRadius: BorderRadius.zero,
+          // No shadow.
+        ),
+      ),
     ),
   ];
 
@@ -55,38 +145,38 @@ class _ReikoAnimationsScreenState extends State<ReikoAnimationsScreen>
   AnimationController _controller;
   OpacityAnimations opacityAnimations;
   SizeAnimations sizeAnimations;
-
-  var translateAnimations = HandleTranslateAnimations();
-  var colorAnimations = HandleColorAnimations();
-  var threeDAnimations = Handle3DXAnimations();
+  ColorAnimations colorAnimations;
+  PositionedAnimations positionedAnimations;
+  ThreeDAnimations threeDAnimations;
+  SlideAnimations slideAnimations;
+  BoxDecorationAnimations boxDecorationAnimations;
 
   @override
   void initState() {
     super.initState();
     //Creating the controller for the animations.
     _controller = new AnimationController(
-      duration: Duration(seconds: 3),
+      duration: Duration(seconds: 4),
       vsync: this,
     )..addStatusListener((status) => print(status));
 
-    //Setando configuração de animações de opacidade
-    opacityAnimations = OpacityAnimations(_controller);
+    opacityAnimations =
+        OpacityAnimations(_controller, widget.opacitySequenceList);
 
-    //Setando configuração de animações de tamanho
     sizeAnimations = SizeAnimations(_controller, widget.sizeSequenceList);
 
-    //Setando configuração de animações de movimento
-    //Somente é possível dentro de um widget do tipo Stack.
-    addTranslateAnimations();
-    translateAnimations.controller = _controller;
+    //Somente possível dentro de um Stack.
+    positionedAnimations =
+        PositionedAnimations(_controller, widget.relativeRectSequenceList);
 
-    //Setando configuração de animações de cor
-    // addColorAnimations();
-    // colorAnimations.controller = _controller;
+    colorAnimations = ColorAnimations(_controller, widget.colorSequenceList);
 
-    //Setando configuração de animações 3d
-    add3DAnimations();
-    threeDAnimations.controller = _controller;
+    threeDAnimations = ThreeDAnimations(_controller, widget.threeDSequenceList);
+
+    slideAnimations = SlideAnimations(_controller, widget.slideSequenceList);
+
+    boxDecorationAnimations =
+        BoxDecorationAnimations(_controller, widget.boxDecorationSequenceList);
   }
 
   @override
@@ -95,108 +185,29 @@ class _ReikoAnimationsScreenState extends State<ReikoAnimationsScreen>
     super.dispose();
   }
 
-  addOpacityAnimations() {
-    opacityAnimations.add(OpacityAnimation(begin: 1, end: 0));
-    opacityAnimations.add(OpacityAnimation());
-    opacityAnimations.add(OpacityAnimation(begin: 1, end: 0));
-    opacityAnimations.add(OpacityAnimation());
-  }
-
-  addTranslateAnimations() {
-    translateAnimations.add(
-        beginValue: Offset(50.0, 50.0),
-        finalValue: Offset(250.0, 50.0),
-        startAnimation: 0.0,
-        endAnimation: 0.25,
-        curve: Curves.linear);
-
-    translateAnimations.add(
-        beginValue: Offset(250.0, 50.0),
-        finalValue: Offset(250.0, 250.0),
-        startAnimation: 0.25,
-        endAnimation: 0.5,
-        curve: Curves.linear);
-
-    translateAnimations.add(
-        beginValue: Offset(250.0, 250.0),
-        finalValue: Offset(50.0, 250.0),
-        startAnimation: 0.5,
-        endAnimation: 0.75,
-        curve: Curves.linear);
-
-    translateAnimations.add(
-        beginValue: Offset(50.0, 250.0),
-        finalValue: Offset(50.0, 50.0),
-        startAnimation: 0.75,
-        endAnimation: 1.0,
-        curve: Curves.linear);
-  }
-
-  addColorAnimations() {
-    colorAnimations.add(
-      beginValue: Colors.red,
-      finalValue: Colors.black87,
-      start: 0.0,
-      end: 0.33,
-      curve: Curves.linear,
-    );
-    colorAnimations.add(
-      beginValue: Colors.black87,
-      finalValue: Colors.yellow,
-      start: 0.33,
-      end: 0.66,
-      curve: Curves.linear,
-    );
-    colorAnimations.add(
-      beginValue: Colors.yellow,
-      finalValue: Colors.red,
-      start: 0.66,
-      end: 1.0,
-      curve: Curves.linear,
-    );
-  }
-
-  add3DAnimations() {
-    threeDAnimations.add(
-      x: true,
-      y: true,
-      z: false,
-      beginValue: 0.0,
-      finalValue: pi,
-      startAnimation: 0.0,
-      endAnimation: 1.0,
-      curve: Curves.linear,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          color: Colors.black45,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              ReikoRenderAnimations(
-                controller: _controller.view,
-                opacity: opacityAnimations,
-                translate: translateAnimations,
-                size: sizeAnimations,
-                threeD: threeDAnimations,
-                //To add color animation u can't set the color of the container
-                color: colorAnimations,
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  // color: Colors.red,
-                  child: Icon(Icons.add_moderator),
-                ),
+      body: Container(
+        alignment: Alignment.centerLeft,
+        child: Stack(
+          children: [
+            RenderAnimations(
+              controller: _controller.view,
+              position: positionedAnimations,
+              //size: sizeAnimations,
+              //opacity: opacityAnimations,
+              //threeD: threeDAnimations,
+              // color: colorAnimations,
+              //slide: slideAnimations,
+              decoration: boxDecorationAnimations,
+              child: Container(
+                width: 100,
+                height: 100,
+                child: Icon(Icons.add_moderator),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Complex UI',
       theme: _themeData,
+      debugShowCheckedModeBanner: false,
       home: ReikoAnimationsScreen(),
       routes: {
         StackScreen.routeName: (ctx) => StackScreen(),

@@ -9,15 +9,19 @@ class TesteScreen extends StatefulWidget {
 
 class _TesteScreenState extends State<TesteScreen>
     with SingleTickerProviderStateMixin {
-  AnimationController controller;
+  RelativeRectTween relativeRectTween = RelativeRectTween(
+    begin: RelativeRect.fromLTRB(30, 380, 200, 30),
+    end: RelativeRect.fromLTRB(200, 10, 0, 350),
+  );
 
-  @override
-  void initState() {
+  AnimationController _controller;
+
+  int state = 0;
+
+  initState() {
     super.initState();
-    controller = new AnimationController(
-      duration: Duration(seconds: 2),
-      vsync: this,
-    );
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
   }
 
   @override
@@ -27,84 +31,37 @@ class _TesteScreenState extends State<TesteScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: Colors.yellow,
         child: Stack(
-          alignment: Alignment.center,
-          children: [
-            AnimationTest(
-              controller,
-              Container(),
+          children: <Widget>[
+            //Modifica o tamanho e o lugar ancorado.
+            PositionedTransition(
+              rect: relativeRectTween.animate(_controller),
+              child: Container(
+                color: Colors.red,
+              ),
+            ),
+
+            Container(
+              child: RaisedButton(
+                onPressed: () {
+                  print('status: ${_controller.status}');
+                  if (_controller.value == 0.5)
+                    _controller.forward();
+                  else if (_controller.status == AnimationStatus.completed ||
+                      _controller.status == AnimationStatus.dismissed) {
+                    _controller.reset();
+                    _controller.animateTo(1 / 2);
+                  }
+                },
+                child: Text(
+                  "CLICK ME!",
+                ),
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class AnimationTest extends StatefulWidget {
-  final AnimationController controller;
-  final Widget child;
-
-  AnimationTest(this.controller, this.child);
-
-  @override
-  _AnimationTestState createState() => _AnimationTestState();
-}
-
-class _AnimationTestState extends State<AnimationTest> {
-  Animation<double> animation;
-
-  initState() {
-    super.initState();
-
-    animation = TweenSequence(
-      <TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.0, end: 100.0)
-              .chain(CurveTween(curve: Curves.linear)),
-          weight: 30.0,
-        ),
-        TweenSequenceItem<double>(
-          tween: ConstantTween<double>(100.0),
-          weight: 10.0,
-        ),
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 100.0, end: 200.0)
-              .chain(CurveTween(curve: Curves.linear)),
-          weight: 30.0,
-        ),
-      ],
-    ).animate(widget.controller);
-
-    animation.addListener(() => print('animation value: ${animation.value}'));
-    widget.controller.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    widget.controller.dispose();
-  }
-
-  //Poderia utilizar um builderAnimation específico para cada ocasião?
-  //De forma a diminuir a quantidade de interrupções na construção das animações.
-  Widget _buildAnimation(BuildContext context, Widget child) {
-    print('building animation...');
-    return Container(
-      width: animation.value,
-      height: animation.value,
-      color: Colors.blue,
-      child: child,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      builder: _buildAnimation,
-      animation: widget.controller,
-      child: widget.child,
     );
   }
 }
