@@ -7,7 +7,9 @@
         {
             "name": "stackui",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            //remove this
+            // "flutterMode": "profile"
         }
     ]
 }

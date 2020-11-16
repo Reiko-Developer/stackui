@@ -14,23 +14,23 @@ import 'package:stackui/widgets/animations/flutter_animations/ioio_animation.dar
 import 'package:stackui/widgets/animations/flutter_animations/reusable_animation.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  final ThemeData _themeData = ThemeData(
-    primarySwatch: Colors.indigo,
-    primaryColor: Colors.indigo,
-    accentColor: Colors.black54,
-  );
+  const MyApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Complex UI',
-      theme: _themeData,
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        primaryColor: Colors.indigo,
+        accentColor: Colors.black54,
+      ),
       debugShowCheckedModeBanner: false,
-      home: ReikoAnimationsScreen(),
+      home: const ReikoAnimationsScreen(),
       routes: {
         StackScreen.routeName: (ctx) => StackScreen(),
         TransformScreenOne.routeName: (ctx) => TransformScreenOne(),
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
         ReusableAnimation.routeName: (ctx) => ReusableAnimation(),
         ExplicitAnimations.routeName: (ctx) => ExplicitAnimations(),
         ReikoAnimationsScreen.routeName: (ctx) => ReikoAnimationsScreen(),
-        TesteScreen.routeName: (ctx) => TesteScreen(),
+        TesteScreen.routeName: (ctx) => const TesteScreen(),
       },
     );
   }

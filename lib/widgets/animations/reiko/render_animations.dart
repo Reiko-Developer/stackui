@@ -1,153 +1,132 @@
 import 'package:flutter/material.dart';
-import 'package:stackui/widgets/animations/reiko/box_decoration_animations.dart';
+import 'package:stackui/widgets/animations/reiko/decoration_animations.dart';
 import 'package:stackui/widgets/animations/reiko/color_animations.dart';
 import 'package:stackui/widgets/animations/reiko/slide_animations.dart';
 import 'package:stackui/widgets/animations/reiko/threed_animations.dart';
 import 'package:stackui/widgets/animations/reiko/positioned_animations.dart';
 import 'package:stackui/widgets/animations/reiko/opacity_animations.dart';
 import 'package:stackui/widgets/animations/reiko/size_animations.dart';
+import 'package:stackui/screens/reiko_animations_screen.dart';
 
-//Recebe o controlador e a lista de animações
 class RenderAnimations extends StatefulWidget {
-  RenderAnimations({
+  const RenderAnimations({
     Key key,
-    @required this.child,
-    @required this.controller,
+    @required this.duration,
 
     //Recebe uma lista de animações
-    this.opacity,
-    this.size,
-    this.color,
-    this.threeD,
-    this.position,
-    this.slide,
-    this.decoration,
-  }) : super(key: key);
+    this.alignment,
+    this.runAnimation,
+    @required this.animationsList,
+    @required this.child,
+  });
 
-  final AnimationController controller;
-  final OpacityAnimations opacity;
-  final SizeAnimations size;
-  final ColorAnimations color;
-  final ThreeDAnimations threeD;
-  final PositionedAnimations position;
-  final SlideAnimations slide;
-  final BoxDecorationAnimations decoration;
+  final Duration duration;
+  final Alignment alignment;
+  final Function runAnimation;
+  final AnimationsList animationsList;
 
-  //Refatorar
   final Widget child;
 
+  //Listas de animações
+
   @override
-  _RenderAnimationsState createState() => _RenderAnimationsState();
+  createState() => _RenderAnimations();
 }
 
-class _RenderAnimationsState extends State<RenderAnimations> {
-  Widget temporaryChild;
+class _RenderAnimations extends State<RenderAnimations>
+    with SingleTickerProviderStateMixin {
+  //TODO: Jogar na classe pai para poder dar acesso ao objeto controller pelo user.
+  AnimationController _controller;
+  //
+  OpacityAnimations opacity;
+  SizeAnimations size;
+  ColorAnimations color;
+  ThreeDAnimations threeD;
+  PositionedAnimations rect;
+  SlideAnimations slide;
+  DecorationAnimations decoration;
 
   @override
   void initState() {
     super.initState();
-    widget.controller.forward();
+    _controller = AnimationController(
+      duration: Duration(seconds: 6),
+      vsync: this,
+    )..addStatusListener((status) => print(status));
+
+    opacity = OpacityAnimations(_controller, widget.animationsList.opacityLs);
+
+    if (widget.animationsList.sizeLs.isNotEmpty)
+      size = SizeAnimations(_controller, widget.animationsList.sizeLs);
+
+    //Somente possível dentro de um Stack.
+    if (widget.animationsList.rectLs.isNotEmpty)
+      rect = PositionedAnimations(_controller, widget.animationsList.rectLs);
+
+    if (widget.animationsList.colorLs.isNotEmpty)
+      color = ColorAnimations(_controller, widget.animationsList.colorLs);
+
+    if (widget.animationsList.threeDLs.isNotEmpty)
+      threeD = ThreeDAnimations(_controller, widget.animationsList.threeDLs);
+
+    if (widget.animationsList.slideLs.isNotEmpty)
+      slide = SlideAnimations(_controller, widget.animationsList.slideLs);
+
+    if (widget.animationsList.decorationLs.isNotEmpty)
+      decoration =
+          DecorationAnimations(_controller, widget.animationsList.decorationLs);
+
+    _controller.forward();
   }
 
   @override
   void dispose() {
-    widget.controller.dispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  //Dispara quando o widget é clicado.
-  //Controla a animação indo para frente quanto não iniciada e indo para trás
-  //quando a animação for completada.
-  void runAnimation() {
-    print('clicked');
-    if (widget.controller.isDismissed) {
-      widget.controller.forward();
-    } else if (widget.controller.isCompleted) widget.controller.reverse();
-  }
-
-  ///
-  ///TODO: Create an exception for when having Positioned and size/translate animations in the same animation.
-  ///
-  ///TODO: Think on improvements, try to join all properties, except Positioned, in just one Container.
-  ///Search for performance issues
-  ///
-  Widget widgetsToAnimate(Container child) {
-    temporaryChild = GestureDetector(onTap: runAnimation, child: child);
-    //Positioned widget deve ser adicionado por último
-
-    if (widget.slide != null && widget.position == null) {
-      temporaryChild = SlideTransition(
-        position: widget.slide.animation,
-        child: temporaryChild,
-      );
-    }
-
-    if (widget.size != null && widget.position == null)
-      temporaryChild = Container(
-        width: widget.size.animation.value.width,
-        height: widget.size.animation.value.height,
-        child: temporaryChild,
-      );
-
-    //Color animations
-    if (widget.color != null) {
-      temporaryChild = Container(
-        color: widget.color.animation.value,
-        child: temporaryChild,
-      );
-    }
-
-    if (widget.threeD != null) {
-      temporaryChild = Transform(
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.0011)
-          ..rotateX(widget.threeD.animation.value.x)
-          ..rotateY(widget.threeD.animation.value.y)
-          ..rotateZ(widget.threeD.animation.value.z),
-        origin: Offset.zero,
-        child: temporaryChild,
-      );
-    }
-
-    if (widget.opacity != null) {
-      temporaryChild = FadeTransition(
-        opacity: widget.opacity.animation,
-        child: temporaryChild,
-      );
-    }
-
-    if (widget.decoration != null) {
-      print('decoration');
-      temporaryChild = DecoratedBoxTransition(
-        decoration: widget.decoration.animation,
-        position: DecorationPosition.background,
-        child: temporaryChild,
-      );
-    }
-
-    if (widget.position != null) {
-      temporaryChild = PositionedTransition(
-        rect: widget.position.animation,
-        child: temporaryChild,
-      );
-    }
-
-    return temporaryChild;
-  }
-
-  //Poderia utilizar um builderAnimation específico para cada ocasião?
-  //De forma a diminuir a quantidade de interrupções na construção das animações.
-  Widget _buildAnimation(BuildContext context, Widget child) {
-    print('building animation...');
-    return widgetsToAnimate(child);
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      builder: _buildAnimation,
-      animation: widget.controller,
+      animation: _controller,
       child: widget.child,
+      builder: (_, child) {
+        return rect != null
+            ? PositionedTransition(
+                rect: rect.animation,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..rotateX(threeD == null ? 0 : threeD.animation.value.x)
+                    ..rotateY(threeD == null ? 0 : threeD.animation.value.y)
+                    ..rotateZ(threeD == null ? 0 : threeD.animation.value.z),
+                  child: GestureDetector(
+                    onTap: widget.runAnimation,
+                    child: FadeTransition(
+                      opacity: opacity == null ? 1 : opacity.animation,
+                      child: Container(
+                        alignment: widget.alignment,
+                        decoration: decoration.animation.value,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Transform(
+                transform: Matrix4.identity()
+                  ..rotateX(threeD == null ? 0 : threeD.animation.value.x)
+                  ..rotateY(threeD == null ? 0 : threeD.animation.value.y)
+                  ..rotateZ(threeD == null ? 0 : threeD.animation.value.z),
+                child: FadeTransition(
+                  opacity: opacity.animation,
+                  child: Container(
+                    alignment: widget.alignment,
+                    decoration: decoration.animation.value,
+                    child: child,
+                  ),
+                ),
+              );
+      },
     );
   }
 }
