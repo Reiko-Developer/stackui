@@ -13,7 +13,6 @@ class ReikoAnimationsScreen extends StatelessWidget {
     print('ReikoAnimationsScreen');
     return Scaffold(
       body: Stack(
-        alignment: Alignment.center,
         children: [
           const RContainer(),
           const MyWidget(),
@@ -33,7 +32,7 @@ class MyWidget extends StatefulWidget {
 class _MyWidget extends State<MyWidget> {
   final ra = RenderAnimations(
     duration: const Duration(seconds: 3),
-    transformAlignment: Alignment.topLeft,
+    transformAlignment: Alignment.center,
     alignment: Alignment.topLeft,
     runAnimation: () {},
     child: Container(
@@ -41,63 +40,65 @@ class _MyWidget extends State<MyWidget> {
       width: 50,
       child: const Text('Reiko-Dev'),
     ),
-    animationsList: AnimationsList(depthPerspective: 0.001)
-      ..addOpacityAnimations(
-        [const OpacityAnimation(weight: 1, value: 0, endValue: 1)],
-      )
-      // ..addPositionAnimations(
-      //   [
-      //     const RelativeRectAnimation(
-      //       weight: 1,
-      //       value: const RelativeRect.fromLTRB(0, 0, 250, 350),
-      //       endValue: const RelativeRect.fromLTRB(200, 200, 0, 0),
-      //     )
-      //   ],
-      // )
-      ..addScaleAnimations(
-        [
-          const ScaleAnimation(
-              weight: 1, value: Offset(1, 1), endValue: Offset(2, 2.5)),
-        ],
-      )
-      ..addSlideAnimations(
-        [
-          const SlideAnimation(
-              weight: 1, value: Offset.zero, endValue: Offset(5, 5)),
-          const SlideAnimation(
-              weight: 1, value: Offset(5, 5), endValue: Offset(5, 10)),
-          const SlideAnimation(
-              weight: 1, value: Offset(5, 10), endValue: Offset(0, 10)),
-        ],
-      )
-      ..addDecorationAnimations(
-        [
-          DecorationAnimation(
-            weight: 1,
-            value: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(60.0),
-              shape: BoxShape.rectangle,
-              boxShadow: const <BoxShadow>[
-                BoxShadow(
-                  color: const Color(0x66666666),
-                  blurRadius: 10.0,
-                  spreadRadius: 3.0,
-                  offset: const Offset(0, 6.0),
-                )
-              ],
-            ),
-            endValue: BoxDecoration(
-              color: Colors.blue,
-              border: Border.all(
-                style: BorderStyle.none,
-              ),
-              borderRadius: BorderRadius.zero,
-              // No shadow.
-            ),
+    animationsList: AnimationsList(
+      depthPerspective: 0.001,
+      opacityList: const [
+        OpacityAnimation(weight: 1, value: 1, endValue: 0),
+        OpacityAnimation(weight: 1, value: 0, endValue: 1),
+        OpacityAnimation(weight: 1, value: 1, endValue: 0),
+      ],
+      //
+      decorationList: const [
+        DecorationAnimation(
+          weight: 1,
+          value: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
-        ],
-      ),
+          endValue: BoxDecoration(
+              color: Colors.blue, borderRadius: BorderRadius.zero),
+        ),
+        DecorationAnimation(
+          weight: 1,
+          value: BoxDecoration(
+            color: Colors.blue,
+          ),
+          endValue: BoxDecoration(
+            color: Colors.purple,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        )
+      ],
+      //
+      rectList: const [
+        RelativeRectAnimation(
+          weight: 1,
+          value: RelativeRect.fromLTRB(0, 0, 250, 350),
+          endValue: RelativeRect.fromLTRB(250, 400, 0, 0),
+        ),
+      ],
+      //
+      scaleList: const [
+        ScaleAnimation(
+          weight: 1,
+          value: Offset.zero,
+          endValue: Offset(1.5, 2),
+        ),
+      ],
+      //
+      threeDList: [
+        ThreeDAnimation(
+          weight: 1,
+          value: math.Vector3(0, 0, 0),
+          endValue: math.Vector3(0, 0, 3.14 / 3),
+        ),
+        ThreeDAnimation(
+          weight: 1,
+          value: math.Vector3(0, 0, 3.14 / 3),
+          endValue: math.Vector3(3.14 / 3, 0, 0),
+        ),
+      ],
+    ),
   );
 
   @override

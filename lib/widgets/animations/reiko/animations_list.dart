@@ -3,41 +3,38 @@ import 'package:stackui/model/reiko_animation_exception.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 
 class AnimationsList {
-  AnimationsList({this.depthPerspective = 0.001});
+  AnimationsList({
+    this.decorationList = const [],
+    this.rectList = const [],
+    this.threeDList = const [],
+    this.slideList = const [],
+    this.colorList = const [],
+    this.scaleList = const [],
+    this.opacityList = const [],
+    this.depthPerspective = 0.001,
+  }) : assert(depthPerspective != null);
 
   ///This value sets the depthPerspective for the given animation.
   ///By default the value is 0.001
   final double depthPerspective;
-  final List<TweenSequenceItem<double>> opacityLs = [
-    TweenSequenceItem(tween: ConstantTween<double>(1), weight: 1),
-  ];
-  final List<TweenSequenceItem<Decoration>> decorationLs = [];
-  final List<TweenSequenceItem<RelativeRect>> rectLs = [];
-  final List<TweenSequenceItem<math.Vector3>> threeDLs = [
-    TweenSequenceItem(
-      tween: ConstantTween<math.Vector3>(math.Vector3(0, 0, 0)),
-      weight: 1,
-    ),
-  ];
+  final List<OpacityAnimation> opacityList;
+  final List<DecorationAnimation> decorationList;
 
-  final List<TweenSequenceItem<Size>> sizeLs = [];
-  final List<TweenSequenceItem<Offset>> slideLs = [];
-  final List<TweenSequenceItem<Color>> colorLs = [];
-  final List<TweenSequenceItem<Offset>> scaleLs = [
-    TweenSequenceItem<Offset>(
-      tween: ConstantTween(Offset(1, 1)),
-      weight: 1,
-    )
-  ];
+  final List<RelativeRectAnimation> rectList;
+  final List<ThreeDAnimation> threeDList;
+
+  final List<SlideAnimation> slideList;
+  final List<ColorAnimation> colorList;
+  final List<ScaleAnimation> scaleList;
 
   isValid() {
-    if (colorLs.isNotEmpty && decorationLs.isNotEmpty) {
+    if (colorList.isNotEmpty && decorationList.isNotEmpty) {
       throw ReikoAnimationException(
         message:
             "You can't use both color and decoration animations, choose only one.",
         reikoException: ReikoExceptions.ColorAndDecorationException,
       );
-    } else if (rectLs.isNotEmpty && (slideLs.isNotEmpty || sizeLs.isNotEmpty)) {
+    } else if (rectList.isNotEmpty && slideList.isNotEmpty) {
       throw ReikoAnimationException(
         message:
             "You can't use both Position and Slide, or Size, animations.\n" +
@@ -47,11 +44,9 @@ class AnimationsList {
     }
   }
 
-  void addOpacityAnimations(List<OpacityAnimation> ls) {
-    if (ls.isEmpty || ls == null) return;
-
+  TweenSequence<double> get opacityTweenSequence {
     List<TweenSequenceItem<double>> tmp = [];
-    for (var i in ls) {
+    for (var i in opacityList) {
       if (i.endValue == null) {
         tmp.add(TweenSequenceItem<double>(
           tween: ConstantTween<double>(i.value),
@@ -67,15 +62,12 @@ class AnimationsList {
         ));
     }
 
-    opacityLs.clear();
-    opacityLs.addAll(tmp);
+    return tmp.isEmpty ? null : TweenSequence<double>(tmp);
   }
 
-  void addDecorationAnimations(List<DecorationAnimation> ls) {
-    if (ls.isEmpty || ls == null) return;
-
+  TweenSequence<Decoration> get decorationTweenSequence {
     List<TweenSequenceItem<Decoration>> tmp = [];
-    for (var i in ls) {
+    for (var i in decorationList) {
       if (i.endValue == null) {
         tmp.add(TweenSequenceItem<Decoration>(
           tween: ConstantTween<Decoration>(i.value),
@@ -87,16 +79,13 @@ class AnimationsList {
           tween: DecorationTween(begin: i.value, end: i.endValue),
         ));
     }
-    decorationLs.clear();
-    decorationLs.addAll(tmp);
+    return tmp.isEmpty ? null : TweenSequence<Decoration>(tmp);
   }
 
   ///An animation that must be inside a [Stack] widget, otherwise, will throw an exception.
-  void addPositionAnimations(List<RelativeRectAnimation> ls) {
-    if (ls.isEmpty || ls == null) return;
-
+  TweenSequence<RelativeRect> get relativeRectTweenSequence {
     List<TweenSequenceItem<RelativeRect>> tmp = [];
-    for (var i in ls) {
+    for (var i in rectList) {
       if (i.endValue == null) {
         tmp.add(TweenSequenceItem<RelativeRect>(
           tween: ConstantTween<RelativeRect>(i.value),
@@ -108,38 +97,13 @@ class AnimationsList {
           weight: i.weight,
         ));
     }
-    rectLs.clear();
-    rectLs.addAll(tmp);
+
+    return rectList.isEmpty ? null : TweenSequence<RelativeRect>(tmp);
   }
 
-  void addSizeAnimations(List<SizeAnimation> ls) {
-    if (ls.isEmpty || ls == null) return;
-
-    List<TweenSequenceItem<Size>> tmp = [];
-    for (var i in ls) {
-      if (i.endValue == null) {
-        tmp.add(TweenSequenceItem(
-          tween: ConstantTween<Size>(i.value),
-          weight: i.weight,
-        ));
-      } else
-        tmp.add(TweenSequenceItem(
-          tween: Tween<Size>(
-            begin: i.value,
-            end: i.endValue,
-          ),
-          weight: i.weight,
-        ));
-    }
-    sizeLs.clear();
-    sizeLs.addAll(tmp);
-  }
-
-  void addSlideAnimations(List<SlideAnimation> ls) {
-    if (ls.isEmpty || ls == null) return;
-
+  TweenSequence<Offset> get slidetTweenSequence {
     List<TweenSequenceItem<Offset>> tmp = [];
-    for (var i in ls) {
+    for (var i in slideList) {
       if (i.endValue == null) {
         tmp.add(TweenSequenceItem(
           tween: ConstantTween<Offset>(i.value),
@@ -151,16 +115,14 @@ class AnimationsList {
           weight: i.weight,
         ));
     }
-    slideLs.clear();
-    slideLs.addAll(tmp);
+
+    return slideList.isEmpty ? null : TweenSequence<Offset>(tmp);
   }
 
-  void addScaleAnimations(List<ScaleAnimation> ls) {
-    if (ls.isEmpty || ls == null) return;
-
+  TweenSequence<Offset> get scaleTweenSequence {
     List<TweenSequenceItem<Offset>> tmp = [];
 
-    for (var i in ls) {
+    for (var i in scaleList) {
       if (i.endValue == null) {
         tmp.add(TweenSequenceItem<Offset>(
             tween: ConstantTween(i.value), weight: 1));
@@ -170,8 +132,23 @@ class AnimationsList {
           weight: 1,
         ));
     }
-    scaleLs.clear();
-    scaleLs.addAll(tmp);
+    return scaleList.isEmpty ? null : TweenSequence<Offset>(tmp);
+  }
+
+  TweenSequence<math.Vector3> get threeDTweenSequence {
+    List<TweenSequenceItem<math.Vector3>> tmp = [];
+
+    for (var i in threeDList) {
+      if (i.endValue == null) {
+        tmp.add(TweenSequenceItem<math.Vector3>(
+            tween: ConstantTween<math.Vector3>(i.value), weight: 1));
+      } else
+        tmp.add(TweenSequenceItem<math.Vector3>(
+          tween: Tween<math.Vector3>(begin: i.value, end: i.endValue),
+          weight: 1,
+        ));
+    }
+    return scaleList.isEmpty ? null : TweenSequence<math.Vector3>(tmp);
   }
 }
 
@@ -201,13 +178,8 @@ class ThreeDAnimation {
   const ThreeDAnimation({this.weight, this.value, this.endValue});
 
   final double weight;
-  final Vector3 value;
-  final Vector3 endValue;
-}
-
-class Vector3 {
-  const Vector3(this.x, this.y, this.z);
-  final double x, y, z;
+  final math.Vector3 value;
+  final math.Vector3 endValue;
 }
 
 class SizeAnimation {
