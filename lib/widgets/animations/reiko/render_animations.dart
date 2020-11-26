@@ -3,28 +3,95 @@ import 'package:stackui/widgets/animations/reiko/animations_list.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 
 class RenderAnimations extends StatefulWidget {
-  ///A constructor that needs a [Duration] for the controller
+  /// A const constructor that requires a [Duration], a [Function] to control the animation, an [AnimationsList] to be executed and the child [Widget].
+  ///
+  /// Can receive the alignment of the transformation
   const RenderAnimations({
     Key key,
     @required this.duration,
-
-    ///This is the alignment for the whole animation
-    this.alignment = Alignment.center,
-
-    ///This is the alignment for the Transform widget.
+    @required this.configAnimation(AnimationController controller),
     this.transformAlignment = Alignment.center,
 
     //
-    @required this.runAnimation,
     @required this.animationsList,
     @required this.child,
-  }) : assert(duration != null);
+  })  : assert(duration != null),
+        assert(child != null);
 
+  /// A [Duration] for the animation controller
   final Duration duration;
-  final Alignment alignment;
+
+  ///This is the alignment for the Transformation animation.
   final Alignment transformAlignment;
-  final Function runAnimation;
+
+  ///The function that must controls the animation, at least, starting it.
+  ///
+  ///The following example put the animation in a loop, add the two listeners and print some data.
+  ///
+  ///```dart
+  /// configAnimation(AnimationController controller) {
+  ///   controller.repeat();
+  ///   controller.addListener( () => print('${controller.value}'));
+  ///   controller.addStatusListener( (status) => print('$status'));
+  ///
+  /// }
+  /// ```
+  /// As you can see, you can control all the animation.
+  final Function configAnimation;
+
+  ///The list of animations to executed on the passed child.
+  ///
+  ///The following example create a simple list of animations:
+  ///
+  ///```dart
+  /// final animationLs = AnimationsList(
+  ///  matrix4DepthPerspective: 0.001,
+  ///   opacityList: const [
+  ///     OpacityAnimation(weight: 1, value: 1, endValue: 0),
+  ///     OpacityAnimation(weight: 1, value: 0, endValue: 1),
+  ///   ],
+  ///   decorationList: const [
+  ///     DecorationAnimation(
+  ///       weight: 1,
+  ///       value: BoxDecoration(
+  ///         color: Colors.red,
+  ///         borderRadius: BorderRadius.all(Radius.circular(8)),
+  ///       ),
+  ///       endValue:
+  ///           BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.zero),
+  ///     ),
+  ///     DecorationAnimation(
+  ///       weight: 1,
+  ///       value: BoxDecoration(
+  ///         color: Colors.blue,
+  ///       ),
+  ///       endValue: BoxDecoration(
+  ///         color: Colors.purple,
+  ///         borderRadius: BorderRadius.all(Radius.circular(8)),
+  ///       ),
+  ///     )
+  ///   ],
+  ///   relativeRectList: const [
+  ///     RelativeRectAnimation(
+  ///       weight: 1,
+  ///       value: RelativeRect.fromLTRB(0, 0, 250, 350),
+  ///       endValue: RelativeRect.fromLTRB(250, 400, 0, 0),
+  ///     ),
+  ///   ],
+  ///   threeDList: [
+  ///     ThreeDAnimation(
+  ///       weight: 1,
+  ///       value: math.Vector3(0, 0, 0),
+  ///       endValue: math.Vector3(0, 0, 3.14 / 3),
+  ///     ),
+  ///   ],
+  /// );
+  ///```
   final AnimationsList animationsList;
+
+  ///The widget below this widget in the tree.
+  ///
+  ///This widget can only have one child.
   final Widget child;
 
   @override
@@ -42,7 +109,7 @@ class _RenderAnimationsState extends State<RenderAnimations>
   Animation<Offset> slide;
   Animation<Size> size;
 
-  int buidlNum = 0;
+  int buildNum = 0;
 
   @override
   void initState() {
@@ -69,46 +136,41 @@ class _RenderAnimationsState extends State<RenderAnimations>
 
     slide = widget.animationsList.slidetTweenSequence?.animate(controller);
 
-    controller.repeat();
+    widget.configAnimation(controller);
   }
 
-  void _controlAnimation() {
-    if (controller.status == AnimationStatus.completed) {
-      controller.reverse();
-    } else if (controller.status == AnimationStatus.dismissed) {
-      controller.forward();
-    }
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Render Animations build method: ${(buidlNum++)}');
+    print('Render Animations build method: ${(buildNum++)}');
 
-    final bool transformHitTests = true;
-    final textDirection = TextDirection.ltr;
     return AnimatedBuilder(
       key: Key('ab-3d'),
-      child: GestureDetector(
-        key: Key('gd'),
-        onTap: _controlAnimation,
-        child: opacity != null
-            ? FadeTransition(
-                opacity: opacity,
-                child: decoration != null
-                    ? DecoratedBoxTransition(
-                        decoration: decoration,
-                        child: widget.child,
-                      )
-                    : widget.child,
-              )
-            : decoration != null
-                ? DecoratedBoxTransition(
-                    decoration: decoration,
-                    child: widget.child,
-                  )
-                : widget.child,
-      ),
       animation: controller,
+      child: opacity != null
+          ? FadeTransition(
+              key: Key('fa'),
+              opacity: opacity,
+              child: decoration != null
+                  ? DecoratedBoxTransition(
+                      key: Key('da'),
+                      decoration: decoration,
+                      child: widget.child,
+                    )
+                  : widget.child,
+            )
+          : decoration != null
+              ? DecoratedBoxTransition(
+                  key: Key('da'),
+                  decoration: decoration,
+                  child: widget.child,
+                )
+              : widget.child,
       builder: (_, child) {
         return rect != null
             ? Positioned.fromRelativeRect(
@@ -117,8 +179,11 @@ class _RenderAnimationsState extends State<RenderAnimations>
                 child: Transform(
                   key: Key('ab-ta'),
                   alignment: widget.transformAlignment ?? Alignment.center,
+
+                  ///The order of the below cascade methods matter.
                   transform: Matrix4.identity()
-                    ..setEntry(3, 2, widget.animationsList.depthPerspective)
+                    ..setEntry(
+                        3, 2, widget.animationsList.matrix4DepthPerspective)
                     ..rotateX(threeD.value.x)
                     ..rotateY(threeD.value.y)
                     ..rotateZ(threeD.value.z)
@@ -129,26 +194,26 @@ class _RenderAnimationsState extends State<RenderAnimations>
                   child: child,
                 ),
               )
-            : FractionalTranslation(
-                key: Key('slide a'),
-                translation: textDirection == TextDirection.rtl
-                    ? Offset(-slide.value.dx, slide.value.dy)
-                    : slide.value,
-                transformHitTests: transformHitTests,
-                child: Transform(
-                  key: Key('ab-ta'),
-                  alignment: widget.transformAlignment ?? Alignment.center,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, widget.animationsList.depthPerspective)
-                    ..rotateX(threeD.value.x)
-                    ..rotateY(threeD.value.y)
-                    ..rotateZ(threeD.value.z)
-                    ..scale(
-                      scale == null ? 1.0 : scale.value.dx,
-                      scale == null ? 1.0 : scale.value.dy,
-                    ),
-                  child: child,
-                ),
+            : Transform(
+                key: Key('ab-ta'),
+                alignment: widget.transformAlignment ?? Alignment.center,
+
+                ///The order of the below cascade methods matter.
+                transform: Matrix4.identity()
+                  ..setEntry(
+                      3, 2, widget.animationsList.matrix4DepthPerspective)
+                  ..rotateX(threeD.value.x)
+                  ..rotateY(threeD.value.y)
+                  ..rotateZ(threeD.value.z)
+                  ..translate(
+                    slide == null ? 0.0 : slide.value.dx,
+                    slide == null ? 0.0 : slide.value.dy,
+                  )
+                  ..scale(
+                    scale == null ? 1.0 : scale.value.dx,
+                    scale == null ? 1.0 : scale.value.dy,
+                  ),
+                child: child,
               );
       },
     );

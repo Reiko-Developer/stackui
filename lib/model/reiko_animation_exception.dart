@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-enum ReikoExceptions { ColorAndDecorationException }
+enum ReikoExceptions {
+  DecorationException,
+  MovementException,
+}
 
 class ReikoAnimationException implements Exception {
   ReikoAnimationException({

@@ -5,22 +5,25 @@ import 'package:vector_math/vector_math_64.dart' as math;
 class AnimationsList {
   AnimationsList({
     this.decorationList = const [],
-    this.rectList = const [],
+    this.relativeRectList = const [],
     this.threeDList = const [],
     this.slideList = const [],
     this.colorList = const [],
     this.scaleList = const [],
     this.opacityList = const [],
-    this.depthPerspective = 0.001,
-  }) : assert(depthPerspective != null);
+    this.matrix4DepthPerspective = 0.001,
+  }) {
+    isValid();
+    assert(matrix4DepthPerspective != null);
+  }
 
   ///This value sets the depthPerspective for the given animation.
   ///By default the value is 0.001
-  final double depthPerspective;
+  final double matrix4DepthPerspective;
   final List<OpacityAnimation> opacityList;
   final List<DecorationAnimation> decorationList;
 
-  final List<RelativeRectAnimation> rectList;
+  final List<RelativeRectAnimation> relativeRectList;
   final List<ThreeDAnimation> threeDList;
 
   final List<SlideAnimation> slideList;
@@ -32,14 +35,13 @@ class AnimationsList {
       throw ReikoAnimationException(
         message:
             "You can't use both color and decoration animations, choose only one.",
-        reikoException: ReikoExceptions.ColorAndDecorationException,
+        reikoException: ReikoExceptions.DecorationException,
       );
-    } else if (rectList.isNotEmpty && slideList.isNotEmpty) {
+    } else if (relativeRectList.isNotEmpty && slideList.isNotEmpty) {
       throw ReikoAnimationException(
-        message:
-            "You can't use both Position and Slide, or Size, animations.\n" +
-                'Choose Or Slide and Size, Or Position animation.',
-        reikoException: ReikoExceptions.ColorAndDecorationException,
+        message: "You can't use both Position and Slide animations.\n" +
+            'Choose one, or Slide or Position animation.',
+        reikoException: ReikoExceptions.MovementException,
       );
     }
   }
@@ -85,7 +87,7 @@ class AnimationsList {
   ///An animation that must be inside a [Stack] widget, otherwise, will throw an exception.
   TweenSequence<RelativeRect> get relativeRectTweenSequence {
     List<TweenSequenceItem<RelativeRect>> tmp = [];
-    for (var i in rectList) {
+    for (var i in relativeRectList) {
       if (i.endValue == null) {
         tmp.add(TweenSequenceItem<RelativeRect>(
           tween: ConstantTween<RelativeRect>(i.value),
@@ -98,7 +100,7 @@ class AnimationsList {
         ));
     }
 
-    return rectList.isEmpty ? null : TweenSequence<RelativeRect>(tmp);
+    return relativeRectList.isEmpty ? null : TweenSequence<RelativeRect>(tmp);
   }
 
   TweenSequence<Offset> get slidetTweenSequence {
