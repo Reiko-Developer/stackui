@@ -12,11 +12,14 @@ class ReikoAnimationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     print('ReikoAnimationsScreen');
     return Scaffold(
+      appBar: AppBar(
+        title: Text('ReikoAnimationsScreen'),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
             const RContainer(
-              color: Colors.grey,
+              color: Colors.white,
               width: double.infinity,
               height: double.infinity,
             ),
@@ -121,7 +124,6 @@ class _MyWidget extends State<MyWidget> {
       child: GestureDetector(
         onTap: runAnimation,
         child: const RContainer(
-          color: Colors.blue,
           width: 50,
           height: 50,
           child: const Text('Reiko-Dev'),
